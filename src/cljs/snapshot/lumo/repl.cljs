@@ -1445,14 +1445,13 @@
           ns-alias (second (re-find #"\(*(\b[a-zA-Z-.<>*=&?]+)/[a-zA-Z-]*$" line))
           line-match-suffix (first (re-find #":?([a-zA-Z-.<>*=&?]*|^\(/)$" line))
           line-prefix (subs line 0 (- (count line) (count line-match-suffix)))
-          completions (if (empty? line-match-suffix)
-                        #js []
-                       (reduce (fn [ret item]
-                                  (doto ret
-                                    (.push (str line-prefix item))))
-                                #js []
-                                (filter #(is-completion? line-match-suffix %)
-                                        (completion-candidates top-level? ns-alias))))]
+          completions (reduce (fn [ret item]
+                                (doto ret
+                                  (.push (str line-prefix item))))
+                              #js []
+                              (filter #(and (is-completion? line-match-suffix %)
+                                            (string/starts-with? % line-prefix))
+                                      (completion-candidates top-level? ns-alias)))]
       (cb (doto completions
             .sort)))))
 
