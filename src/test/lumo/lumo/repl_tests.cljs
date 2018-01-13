@@ -51,6 +51,12 @@
      (fn [completions]
        (is (f (contains? (set completions) o)))))))
 
+(defn is-empty-completion
+  [i]
+  (lumo/get-completions i
+     (fn [completions]
+       (is (empty? (set completions))))))
+
 (when test-util/lumo-env?
   (deftest test-get-completions
     (testing "keyword completions"
@@ -118,7 +124,11 @@
       (testing "arbitrary fully qualified keyword"
         (s/def :arbitrary/a-spec string?)
         (is-contains-completion ":arbitrary/" ":arbitrary/a-spec")
-        (reset! s/registry-ref {})))))
+        (reset! s/registry-ref {})))
+    (testing "prefix filtering"
+      (is-empty-completion "red6")
+      (is-contains-completion "goog" "goog-define")
+      (is-contains-completion "goog." "goog.Uri"))))
 
 
 
