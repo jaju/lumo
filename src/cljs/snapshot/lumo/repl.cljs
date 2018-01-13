@@ -1437,6 +1437,8 @@
            (map str (keys special-doc-map))
            (map str (keys repl-special-doc-map))))])))
 
+(def completion-candidates-memoized (memoize completion-candidates))
+
 (defn ^:export get-completions
   [line cb]
   (if-some [js-matches (re-find #"js/(\S*)$" line)]
@@ -1448,10 +1450,10 @@
           completions (reduce (fn [ret item]
                                 (doto ret
                                   (.push (str line-prefix item))))
-                              #js []
-                              (filter #(and (is-completion? line-match-suffix %)
-                                            (string/starts-with? % line-prefix))
-                                      (completion-candidates top-level? ns-alias)))]
+                        #js []
+                        (filter #(and (is-completion? line-match-suffix %)
+                                      (string/starts-with? % line-prefix))
+                                (completion-candidates-memoized top-level? ns-alias)))]
       (cb (doto completions
             .sort)))))
 
